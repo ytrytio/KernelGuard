@@ -11,6 +11,7 @@ router = Router(name=__name__)
 
 @router.message(F.text.in_({"Windows", "Linux", "MacOS"}), F.chat.type == "private")
 async def handle_captcha_text(message: Message, bot: Bot):
+    global pending_approvals
     if not message.from_user: return
     user_id = message.from_user.id
     user_name = message.from_user.first_name
@@ -20,7 +21,6 @@ async def handle_captcha_text(message: Message, bot: Bot):
     if user_id not in pending_approvals:
         return await message.answer("Your join requests can not be found. \nWrite @cyber_glor in private, if you don't think so.", reply_markup=ReplyKeyboardRemove())
 
-    global pending_approvals
     chat_id = pending_approvals[user_id]
     until_ban = int(unixtime() + 86400)
 
