@@ -20,6 +20,8 @@ class AIHandler:
             "Haste makes waste, slow down.",
             "You're in a hell of a hurry, brake it.",
             "Give me a fucking break!",
+            "ТОРМОЗИ НАХУЙ",
+            "Хватит, заебал!"
         ]
 
     def _load_prompt(self, path: str | Path) -> str:
