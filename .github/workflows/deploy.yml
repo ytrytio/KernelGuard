@@ -13,5 +13,5 @@ jobs:
         run: |
           cd ~/KernelGuard
           git pull
-          uv sync
+          /home/glor/.venv/bin/uv sync
           systemctl restart kernelguard
