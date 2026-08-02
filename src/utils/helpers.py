@@ -1,5 +1,6 @@
 from asyncio import sleep as asleep
 
+from aiogram import Bot
 from aiogram.enums import ChatType
 from aiogram.types import ChatPermissions
 
@@ -20,26 +21,8 @@ def get_permissions(yet: bool):
         can_pin_messages=False
     )
 
-async def change_prefix(bot, chat, user_id, prefix="Member"):
-    await chat.promote(
-        user_id=user_id,
-        can_change_info=False,
-        can_delete_messages=False,
-        can_delete_stories=False,
-        can_edit_messages=False,
-        can_edit_stories=False,
-        can_invite_users=False,
-        can_manage_chat=False,
-        can_manage_video_chats=False,
-        can_pin_messages=False,
-        can_post_messages=False,
-        can_post_stories=True,
-        can_promote_members=False,
-        can_restrict_members=False,
-        is_anonymous=False
-    )
-    await asleep(5)
-    await bot.set_chat_administrator_custom_title(chat.id, user_id, prefix)
+async def change_prefix(bot: Bot, chat_id: int, user_id: int, prefix: str = "Member"):
+    await bot.set_chat_member_tag(chat_id, user_id, prefix)
     return
 
 async def check(chat_type, chat_id, message):

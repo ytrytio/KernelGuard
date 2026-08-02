@@ -5,7 +5,6 @@ from aiosqlite import Connection
 from groq import AsyncGroq
 from sys import exit
 from logging import getLogger, Logger
-from re import sub, DOTALL
 
 from ..utils.database import database
 from ..config import GROQ_TOKEN, SYSTEM_PROMPT_PATH, THINKING_MODELS
@@ -81,8 +80,8 @@ class AIHandler:
         
         return raw_text # clean_text
 
-if not GROQ_TOKEN:
-    logger.critical("GROQ_TOKEN not found in .env")
-    exit()
+# if not GROQ_TOKEN:
+#     logger.critical("GROQ_TOKEN not found in .env")
+#     exit()
 
-ai = AIHandler(api_key=GROQ_TOKEN)
+# ai = AIHandler(api_key=GROQ_TOKEN)

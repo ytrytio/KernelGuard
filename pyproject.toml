@@ -2,6 +2,7 @@
 name = "kernelguard"
 version = "0.1.0"
 description = "Add your description here"
+authors = [{ name = "ytrytio" }]
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -10,5 +11,9 @@ dependencies = [
     "groq>=1.2.0",
     "pip>=26.1.1",
     "python-dotenv>=1.2.2",
+    "python-urbandict>=0.3.17",
     "rich>=15.0.0",
 ]
+
+[tool.uv.sources]
+python-urbandict = { git = "https://github.com/ytrytio/pyurbandict", rev = "main" }

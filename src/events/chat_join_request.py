@@ -2,6 +2,8 @@ from aiogram import F, Router, Bot
 from aiogram.types import ChatJoinRequest, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import Command
 
+from random import shuffle
+
 from ..config import GROUP
 from ..storage.temp import pending_approvals
 
@@ -16,12 +18,17 @@ async def handle_join_request(request: ChatJoinRequest, bot: Bot):
     global pending_approvals
     pending_approvals[user_id] = chat_id
     
+    buttons = [
+        [KeyboardButton(text="Windows")],
+        [KeyboardButton(text="Linux")],
+        [KeyboardButton(text="MacOS")],
+        [KeyboardButton(text="*BSD")],
+    ]
+    
+    shuffle(buttons)
+    
     markup = ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="Windows")],
-            [KeyboardButton(text="Linux")],
-            [KeyboardButton(text="MacOS")]
-        ],
+        keyboard=buttons,
         resize_keyboard=True,
         one_time_keyboard=True
     )

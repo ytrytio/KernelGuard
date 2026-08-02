@@ -9,7 +9,7 @@ from ..utils.helpers import change_prefix
 
 router = Router(name=__name__)
 
-@router.message(F.text.in_({"Windows", "Linux", "MacOS"}), F.chat.type == "private")
+@router.message(F.text.in_({"Windows", "Linux", "MacOS", "*BSD"}), F.chat.type == "private")
 async def handle_captcha_text(message: Message, bot: Bot):
     global pending_approvals
     if not message.from_user: return
@@ -25,7 +25,7 @@ async def handle_captcha_text(message: Message, bot: Bot):
     until_ban = int(unixtime() + 86400)
 
     try:
-        if user_answer == "Linux":
+        if user_answer in ["Linux", "*BSD"]:
             await bot.approve_chat_join_request(chat_id=chat_id, user_id=user_id)
             await message.answer(
                 f"Nice job, homie. Welcome to <a href=\"https://t.me/c/2500557416\">Kernel Syndicate</a>!",
@@ -37,7 +37,7 @@ async def handle_captcha_text(message: Message, bot: Bot):
                 f"Welcome to Kernel Syndicate, {link}!",
                 parse_mode="HTML"
             )
-            await change_prefix(message.chat, user_id, "Member")
+            await change_prefix(bot, GROUP, user_id, "Member")
         else:
             await bot.decline_chat_join_request(chat_id=chat_id, user_id=user_id)
             await bot.ban_chat_member(chat_id=chat_id, user_id=user_id, until_date=until_ban)
