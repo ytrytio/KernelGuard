@@ -1,5 +1,3 @@
-from asyncio import sleep as asleep
-
 from aiogram import Bot
 from aiogram.enums import ChatType
 from aiogram.types import ChatPermissions
