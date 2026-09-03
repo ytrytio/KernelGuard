@@ -1,21 +1,32 @@
 import time
 import random
+import asyncio
 from pathlib import Path
 from aiosqlite import Connection
-from groq import AsyncGroq
 from sys import exit
 from logging import getLogger, Logger
+from llama_cpp import Llama
 
 from ..utils.database import database
-from ..config import GROQ_TOKEN, SYSTEM_PROMPT_PATH, THINKING_MODELS
+from ..config import SYSTEM_PROMPT_PATH, DEFAULT_MODEL
 
 logger: Logger = getLogger()
 
-DEFAULT_MODEL = "qwen/qwen3.6-27b"
+MODEL_PATH = str(DEFAULT_MODEL)
 
 class AIHandler:
-    def __init__(self, api_key: str, system_prompt_path: str | Path = SYSTEM_PROMPT_PATH, cooldown: int = 5):
-        self.client = AsyncGroq(api_key=api_key)
+    def __init__(
+        self, 
+        model_path: str | Path = MODEL_PATH, 
+        system_prompt_path: str | Path = SYSTEM_PROMPT_PATH, 
+        cooldown: int = 5
+    ):
+        self.llm = Llama(
+            model_path=str(model_path),
+            n_ctx=1024,
+            n_threads=2,
+            verbose=False
+        )
         self.system_prompt = self._load_prompt(system_prompt_path)
         self.cooldown = cooldown
         self.last_request_time = {}
@@ -29,21 +40,36 @@ class AIHandler:
     def _load_prompt(self, path: str | Path) -> str:
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
-            
+
     @staticmethod
     @database
     async def get_model(db: Connection) -> str:
-        async with db.execute("SELECT value FROM global WHERE key=?", ("model",)) as cursor:
-            result = await cursor.fetchone()
-            return result["value"] if result else DEFAULT_MODEL
+        return MODEL_PATH
+
+    def _generate_sync(self, messages: list[dict], temperature: float, max_tokens: int) -> str:
+        response = self.llm.create_chat_completion(
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            repeat_penalty=1.22,
+            stop=[
+                "<|im_end|>", 
+                "<|endoftext|>", 
+                "\n[",
+                "\nUSER:", 
+                "\nGLOR:"
+            ]
+        )
+        logger.info(response)
+        return response["choices"][0]["message"]["content"] or ""
 
     async def ask(
         self,
         previous_ai_text: str | None,
         current_text: str,
         user_id: int,
-        system_prompt: str | None,
-        model: str = DEFAULT_MODEL,
+        system_prompt: str | None = None,
+        model: str = MODEL_PATH,
         moder: bool = False
     ) -> str:
         if not moder:
@@ -54,34 +80,27 @@ class AIHandler:
                 return random.choice(self.cooldown_replies)
             
             self.last_request_time[user_id] = now
-        
-        if not system_prompt: 
-            system_prompt = self.system_prompt
-            
-        messages = [{"role": "system", "content": system_prompt}]
-        
-        if not moder and previous_ai_text:
-            messages.append({"role": "assistant", "content": previous_ai_text})
-            
-        messages.append({"role": "user", "content": current_text})
     
-        response = await self.client.chat.completions.create(
-            messages=messages, # type: ignore
-            model=model,
-            reasoning_format="hidden" if any((model in THINKING_MODELS, moder)) else None,
-            temperature=0.1 if moder else 0.7,
-            max_completion_tokens=1024 if moder else 4096,
-            reasoning_effort="low" if moder else None
+        if not system_prompt or not system_prompt.strip():
+            system_prompt = self.system_prompt
+    
+        messages = [{"role": "system", "content": system_prompt.strip()}]
+    
+        if not moder and previous_ai_text and not previous_ai_text.startswith("Detected violation!"):
+            messages.append({"role": "assistant", "content": previous_ai_text.strip()})
+    
+        messages.append({"role": "user", "content": current_text.strip()})
+    
+        temperature = 0.1 if moder else 0.7
+        max_tokens = 256 if moder else 512
+    
+        raw_text = await asyncio.to_thread(
+            self._generate_sync,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
         )
-        logger.info(response)
-        
-        raw_text = response.choices[0].message.content or ""
-        # clean_text = sub(r'<think>.*?</think>', '', raw_text, flags=DOTALL).strip()
-        
-        return raw_text # clean_text
+    
+        return raw_text.strip()
 
-# if not GROQ_TOKEN:
-#     logger.critical("GROQ_TOKEN not found in .env")
-#     exit()
-
-# ai = AIHandler(api_key=GROQ_TOKEN)
+ai = AIHandler()

@@ -1,4 +1,4 @@
-from re import sub, escape, DOTALL, IGNORECASE, MULTILINE
+from re import sub, escape, DOTALL, IGNORECASE, MULTILINE, findall
 from datetime import datetime
 
 from ..config import MARKDOWN_PATTERNS, ESCAPE_CHARS
@@ -43,3 +43,24 @@ def get_human_uptime(created_at_str: str) -> str:
         return ", ".join(parts) if parts else "just joined"
     except Exception:
         return "unknown"
+
+
+def fix_markdown(text: str) -> str:
+    if not text:
+        return text
+
+    formatting_tokens = ['**', '*', '```', '`', '__', '_', '~', '||']
+    
+    for token in formatting_tokens:
+        pattern = r'(?<!\\)' + escape(token)
+        matches = len(findall(pattern, text))
+        
+        if matches % 2 != 0:
+            text = text.rstrip() + token
+
+    open_brackets = len(findall(r'(?<!\\)\[', text))
+    close_brackets = len(findall(r'(?<!\\)\]', text))
+    if open_brackets > close_brackets:
+        text += "]" * (open_brackets - close_brackets)
+
+    return text

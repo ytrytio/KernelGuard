@@ -26,6 +26,7 @@ SYSTEM_PROMPT_PATH = PROJECT_DIR / "system_prompt.txt"
 RULES_PROMPT_PATH = PROJECT_DIR / "rules_prompt.txt"
 DB_PATH = PROJECT_DIR / "data.db"
 TEMPLATE_PATH = PROJECT_DIR / "template.sql"
+DEFAULT_MODEL = PROJECT_DIR / "models" / "Qwen2.5-1.5B-Instruct.Q4_K_M.gguf"
 
 BANNED_MODELS = [
     "canopylabs",

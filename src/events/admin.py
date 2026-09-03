@@ -182,7 +182,7 @@ async def everyone(message: Message, db: Connection):
             "```bash\n"
             "PING everyone (kernelsyndicate) 56(84) bytes of data.\n"
             f"{users_str}"
-            "--- everyone ping statistics ---\n"
+            "\n--- everyone ping statistics ---\n"
             f"{total_hosts} packets transmitted, {received_hosts} received, {loss_percent}% packet loss\n"
             "```"
             f"{hidden_payload}"

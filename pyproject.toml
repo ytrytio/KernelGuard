@@ -9,6 +9,7 @@ dependencies = [
     "aiogram>=3.31.0",
     "aiosqlite>=0.22.1",
     "groq>=1.2.0",
+    "llama-cpp-python>=0.3.35",
     "pip>=26.1.1",
     "python-dotenv>=1.2.2",
     "python-urbandict>=0.3.17",
