@@ -6,6 +6,7 @@ from time import time as unixtime
 from ..storage.temp import pending_approvals
 from ..config import GROUP
 from ..utils.helpers import change_prefix
+from ..utils.members import register_member
 
 router = Router(name=__name__)
 
@@ -38,6 +39,7 @@ async def handle_captcha_text(message: Message, bot: Bot):
                 parse_mode="HTML"
             )
             await change_prefix(bot, GROUP, user_id, "Member")
+            await register_member(user_id)
         else:
             await bot.decline_chat_join_request(chat_id=chat_id, user_id=user_id)
             await bot.ban_chat_member(chat_id=chat_id, user_id=user_id, until_date=until_ban)
